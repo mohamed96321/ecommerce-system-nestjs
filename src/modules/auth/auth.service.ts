@@ -1,40 +1,29 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserRepository } from '../users/ports/user-repository.port';
 import * as bcrypt from 'bcrypt';
-import { RegisterUserDto } from './dto/register-user.dto';
+import { UsersService } from '../user/user.service';
+import { IUser } from '../user/interfaces/user.interface';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private userRepository: UserRepository,
+    private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.userRepository.findByEmail(email);
-    if (user && (await bcrypt.compare(password, user.password))) {
-      const { password, ...result } = user;
-      return result;
-    }
-    throw new UnauthorizedException('Invalid credentials');
+  async validateUser(email: string, password: string): Promise<IUser> {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) throw new UnauthorizedException('Invalid credentials');
+    if (!(await bcrypt.compare(password, user.password))) throw new UnauthorizedException('Invalid credentials');
+    return user;
   }
 
-  async login(user: any) {
-    const payload = { sub: user.id, email: user.email, roles: user.roles };
-    return { accessToken: this.jwtService.sign(payload) };
+  async login(user: IUser): Promise<{ access_token: string }> {
+    const payload = { sub: user._id, email: user.email, roles: user.roles };
+    return { access_token: this.jwtService.sign(payload) };
   }
 
-  async register(dto: RegisterUserDto) {
-    const existingUser = await this.userRepository.findByEmail(dto.email);
-    if (existingUser) throw new ConflictException('User already exists');
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
-    const user = {
-      email: dto.email,
-      password: hashedPassword,
-      roles: ['customer'],
-      isActive: true,
-    };
-    return this.userRepository.create(user);
+  async register(email: string, password: string, roles: string[] = ['customer']): Promise<IUser> {
+    return this.usersService.createUser(email, password, roles);
   }
 }

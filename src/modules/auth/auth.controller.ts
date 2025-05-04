@@ -1,21 +1,28 @@
-import { Controller, Post, Body, Request, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UsePipes, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterUserDto } from './dto/register-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
-import { LocalAuthGuard } from './guards/local-auth.guard';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 
-@Controller('auth')
+@ApiTags('auth')
+@Controller({ path: 'auth', version: '1' })
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Post('register')
-  async register(@Body() dto: RegisterUserDto) {
-    return this.authService.register(dto);
+  @Post('login')
+  @UsePipes(new ValidationPipe())
+  @ApiOperation({ summary: 'User login' })
+  @ApiResponse({ status: 201, description: 'Login successful' })
+  async login(@Body() loginDto: LoginDto) {
+    const user = await this.authService.validateUser(loginDto.email, loginDto.password);
+    return this.authService.login(user);
   }
 
-  @UseGuards(LocalAuthGuard)
-  @Post('login')
-  async login(@Request() req, @Body() dto: LoginUserDto) {
-    return this.authService.login(req.user);
+  @Post('register')
+  @UsePipes(new ValidationPipe())
+  @ApiOperation({ summary: 'User registration' })
+  @ApiResponse({ status: 201, description: 'User registered' })
+  async register(@Body() registerDto: RegisterDto) {
+    return this.authService.register(registerDto.email, registerDto.password, registerDto.roles);
   }
 }

@@ -1,98 +1,217 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# E-commerce API with NestJS
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This is a production-ready e-commerce API built with **NestJS**, designed to provide a scalable and maintainable solution with features inspired by modern e-commerce platforms like Amazon. The project adheres to **SOLID**, **KISS**, and **DRY** principles, ensuring clean, modular, and efficient code. It includes advanced features such as health checks, distributed tracing, rate limiting, request validation, API versioning, DTOs with validation, caching, robust error handling, and asynchronous queue processing with BullMQ.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- **Authentication & Authorization**: JWT-based user authentication and role-based access control.
+- **Product Management**: CRUD operations for products with stock management.
+- **Order Processing**: Order creation, payment integration with Stripe, and state machine for order status transitions.
+- **Payments**: Secure payment processing with Stripe, including idempotency for reliability.
+- **Wishlists**: User-specific wishlists for saving favorite products.
+- **Recommendations**: Basic product recommendations based on user order history.
+- **Search**: Full-text product search using Elasticsearch.
+- **Order Tracking**: Real-time tracking of order shipments.
+- **Customer Support**: Ticket-based support system for user inquiries.
+- **Promotions**: Discount code application for orders.
+- **API Documentation**: Swagger UI for interactive API exploration.
+- **Performance & Reliability**:
+  - Caching with Redis for improved performance.
+  - Rate limiting to prevent abuse.
+  - Distributed tracing with OpenTelemetry for monitoring.
+  - Asynchronous processing with BullMQ for order handling.
+  - Health checks for service monitoring.
+- **Security**: Helmet for HTTP headers, CORS, and cookie parsing.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Project Structure
 
-## Project setup
+The project is organized into modular components following NestJS conventions:
 
-```bash
-$ npm install
+```
+src/
+├── config/                     # Configuration and validation schemas
+├── modules/                    # Feature modules (auth, orders, payments, etc.)
+│   ├── auth/
+│   ├── health/
+│   ├── orders/
+│   ├── payments/
+│   ├── products/
+│   ├── recommendations/
+│   ├── search/
+│   ├── support/
+│   ├── tracking/
+│   ├── users/
+│   ├── wishlists/
+│   └── promotions/
+├── shared/                     # Shared utilities (e.g., filters)
+├── app.module.ts               # Root module
+└── main.ts                     # Application entry point
 ```
 
-## Compile and run the project
+## Prerequisites
+
+Ensure the following are installed on your system:
+
+- **Node.js**: v18 or higher
+- **MongoDB**: v5 or higher (running locally or via Docker)
+- **Redis**: v6 or higher (for caching and BullMQ)
+- **Elasticsearch**: v8 or higher (for search functionality)
+- **Stripe Account**: For payment processing (API keys required)
+- **Docker** (optional): For running MongoDB, Redis, or Elasticsearch
+
+## Installation
+
+1. **Clone the repository**:
+   ```bash
+   git clone <repository-url>
+   cd ecommerce-api
+   ```
+
+2. **Dependencies**:
+   Run this command to install required packages:
+   ```bash
+   npm install @nestjs/core @nestjs/common @nestjs/config @nestjs/mongoose @nestjs/jwt @nestjs/passport @nestjs/swagger @nestjs/throttler @nestjs/terminus @nestjs/   cache-manager @nestjs/elasticsearch @nestjs/bullmq @nestjs/websockets nest-winston winston helmet cookie-parser stripe bcrypt class-validator class-transformer mongoose redis bullmq @opentelemetry/sdk-node @opentelemetry/exporter-trace-otlp-http  @opentelemetry/auto-instrumentations-node @opentelemetry/instrumentation-mongodb  cache-manager-redis-store passport passport-jwt socket.io
+   ```
+
+3. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+4. **Set up environment variables**:
+   Create a `.env` file in the root directory and add the following:
+   ```env
+   PORT=3000
+   MONGODB_URI=mongodb://localhost:27017/ecommerce_db
+   JWT_SECRET=your-secret
+   JWT_EXPIRES_IN=1h
+   REDIS_HOST=localhost
+   REDIS_PORT=6379
+   CORS_ORIGIN=http://localhost:3000
+   STRIPE_SECRET_KEY=your-stripe-secret-key
+   STRIPE_PUBLIC_KEY=your-stripe-public-key
+   ```
+
+5. **Start dependent services** (if not already running):
+   - **MongoDB**:
+     ```bash
+     docker run -d -p 27017:27017 --name mongodb mongo
+     ```
+   - **Redis**:
+     ```bash
+     docker run -d -p 6379:6379 --name redis redis
+     ```
+   - **Elasticsearch**:
+     ```bash
+     docker run -d -p 9200:9200 -e "discovery.type=single-node" --name elasticsearch elasticsearch:8.8.0
+     ```
+
+6. **Run the application**:
+   ```bash
+   npm run start:dev
+   ```
+
+   The API will be available at `http://localhost:3000/api`.
+
+## API Documentation (Swagger UI)
+
+The API is documented using **Swagger UI**, which provides an interactive interface to explore and test endpoints.
+
+- **Access Swagger UI**: Navigate to `http://localhost:3000/api-docs` after starting the application.
+- **Features**:
+  - Detailed documentation for all endpoints, including request/response schemas.
+  - Support for JWT authentication (use the "Authorize" button to input a Bearer token).
+  - Try out endpoints directly from the UI.
+- **Key Endpoints**:
+  - `/auth/register`: Register a new user.
+  - `/auth/login`: Log in and obtain a JWT token.
+  - `/orders`: Create and manage orders.
+  - `/payments/intent`: Create a payment intent with Stripe.
+  - `/wishlists`: Manage user wishlists.
+  - `/recommendations`: Get product recommendations.
+  - `/search?q=<query>`: Search products.
+  - `/tracking`: Track order shipments.
+  - `/support/tickets`: Create and manage support tickets.
+  - `/promotions`: Create and apply promotion codes.
+  - `/health`: Check service health.
+
+To authenticate requests in Swagger UI:
+1. Log in using the `/auth/login` endpoint to obtain a JWT token.
+2. Click the "Authorize" button in Swagger UI and enter `Bearer <your-token>`.
+
+## Design Principles
+
+The project is built with the following principles to ensure maintainability and scalability:
+
+- **SOLID**:
+  - **Single Responsibility**: Each module/class handles a specific concern (e.g., `OrdersService` for order logic, `PaymentsService` for payments).
+  - **Open/Closed**: Services are extensible via dependency injection without modifying existing code.
+  - **Liskov Substitution**: Interfaces can be implemented for substitutable types if needed.
+  - **Interface Segregation**: Modules import only necessary dependencies (e.g., `OrdersModule` imports specific modules).
+  - **Dependency Inversion**: High-level modules depend on abstractions via dependency injection.
+
+- **KISS (Keep It Simple, Stupid)**:
+  - Simple logic in methods like `createOrder`, which delegates complex tasks (e.g., payments) to specialized services.
+  - Clear state transitions in `transitionOrderState` using a state machine.
+
+- **DRY (Don't Repeat Yourself)**:
+  - Global utilities like `HttpExceptionFilter` for error handling and `ValidationPipe` for request validation.
+  - Shared caching logic in `OrdersService` to avoid duplication.
+
+## Dependencies
+
+The project uses the following key packages:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install @nestjs/core @nestjs/common @nestjs/config @nestjs/mongoose @nestjs/jwt @nestjs/passport @nestjs/swagger @nestjs/throttler @nestjs/terminus @nestjs/cache-manager @nestjs/elasticsearch @nestjs/bullmq @nestjs/websockets nest-winston winston helmet cookie-parser stripe bcrypt class-validator class-transformer mongoose redis bullmq @opentelemetry/sdk-node @opentelemetry/exporter-trace-otlp-http @opentelemetry/auto-instrumentations-node @opentelemetry/instrumentation-mongodb cache-manager-redis-store passport passport-jwt socket.io
 ```
 
-## Run tests
+## Running Tests
+
+To run unit and integration tests (if implemented):
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run test
 ```
+
+To run end-to-end tests:
+
+```bash
+npm run test:e2e
+```
+
+*Note*: Ensure test suites are added for critical modules (e.g., `OrdersService`, `PaymentsService`) to verify functionality.
 
 ## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+For production deployment:
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+1. **Set `NODE_ENV=production`** in your environment to enable optimized logging.
+2. **Build the project**:
+   ```bash
+   npm run build
+   ```
+3. **Run in production**:
+   ```bash
+   npm run start:prod
+   ```
+4. **Use a process manager** like PM2 for reliability:
+   ```bash
+   npm install -g pm2
+   pm2 start dist/main.js --name ecommerce-api
+   ```
+5. **Monitor with OpenTelemetry**: Ensure the OpenTelemetry collector is running at `http://localhost:4318/v1/traces` for distributed tracing.
 
-```bash
-$ npm install -g mau
-$ mau deploy
-```
+## Contributing
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Contributions are welcome! Please follow these steps:
 
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/your-feature`).
+3. Commit your changes (`git commit -m "Add your feature"`).
+4. Push to the branch (`git push origin feature/your-feature`).
+5. Open a pull request.
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+This project is licensed under the MIT License.
