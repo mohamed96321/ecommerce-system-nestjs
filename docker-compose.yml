@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongo:27017/ecommerce_db
+      - REDIS_HOST=redis
+      - PORT=3000
+      - JWT_SECRET=${JWT_SECRET}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY}
+      - CLOUDINARY_NAME=${CLOUDINARY_NAME}
+      - CLOUDINARY_KEY=${CLOUDINARY_KEY}
+      - CLOUDINARY_SECRET=${CLOUDINARY_SECRET}
+      - CORS_ORIGIN=http://localhost:3000
+    depends_on:
+      - mongo
+      - redis
+      - elasticsearch
+    networks:
+      - ecommerce-network
+
+  mongo:
+    image: mongo:5.0
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=ecommerce_db
+    networks:
+      - ecommerce-network
+
+  redis:
+    image: redis:6.2-alpine
+    volumes:
+      - redis_data:/data
+    networks:
+      - ecommerce-network
+
+  elasticsearch:
+    image: elasticsearch:7.17.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - '9200:9200'
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - ecommerce-network
+
+volumes:
+  mongo_data:
+  redis_data:
+  es_data:
+
+networks:
+  ecommerce-network:
+    driver: bridge

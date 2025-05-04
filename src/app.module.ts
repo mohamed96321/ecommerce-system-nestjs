@@ -3,11 +3,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
 import { ElasticsearchModule } from '@nestjs/elasticsearch';
+import { TerminusModule } from '@nestjs/terminus';
 import configuration from './config/configuration';
 import { validationSchema } from './config/env.validation';
+import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/user/user.module';
 import { ProductsModule } from './modules/product/product.module';
@@ -49,7 +52,10 @@ import { QuestionsModule } from './modules/questions/questions.module';
       }),
       inject: [ConfigService],
     }),
+    ThrottlerModule.forRoot({ ttl: 60, limit: 100 }),
     ElasticsearchModule.register({ node: 'http://localhost:9200' }),
+    TerminusModule,
+    HealthModule,
     AuthModule,
     UsersModule,
     ProductsModule,
