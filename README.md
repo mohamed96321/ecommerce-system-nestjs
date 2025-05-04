@@ -28,23 +28,38 @@ This is a production-ready e-commerce API built with **NestJS**, designed to pro
 The project is organized into modular components following NestJS conventions:
 
 ```
+ecommerce-api folder structure overview:
 src/
-├── config/                     # Configuration and validation schemas
-├── modules/                    # Feature modules (auth, orders, payments, etc.)
+├── config/
+├── modules/
 │   ├── auth/
-│   ├── health/
-│   ├── orders/
-│   ├── payments/
-│   ├── products/
-│   ├── recommendations/
-│   ├── search/
-│   ├── support/
-│   ├── tracking/
+│   │   └── dot/
+│   │   ├── auth.module.ts
+│   │   ├── auth.service.ts
+│   │   ├── auth.controller.ts
 │   ├── users/
-│   ├── wishlists/
-│   └── promotions/
-├── shared/                     # Shared utilities (e.g., filters)
-├── app.module.ts               # Root module
+│   │   ├── users.module.ts
+│   │   ├── users.service.ts
+│   │   ├── users.controller.ts
+│   │   └── dot/
+│   │   └── interfaces/
+│   │   └── schemas/
+│   ├── products/
+│   │   ├── products.module.ts
+│   │   ├── products.service.ts
+│   │   ├── products.controller.ts
+│   │   └── dot/
+│   │   └── schemas/
+│   │   └── interfaces/
+│   └── ... (other modules)
+├── shared/
+│   ├── pipes/
+│   ├── strategies/
+│   ├── decorators/
+│   ├── guards/
+│   ├── exceptions/
+│   └── filters/
+├── app.module.ts
 └── main.ts                     # Application entry point
 ```
 
@@ -84,12 +99,14 @@ Ensure the following are installed on your system:
    PORT=3000
    MONGODB_URI=mongodb://localhost:27017/ecommerce_db
    JWT_SECRET=your-secret
-   JWT_EXPIRES_IN=1h
    REDIS_HOST=localhost
    REDIS_PORT=6379
    CORS_ORIGIN=http://localhost:3000
    STRIPE_SECRET_KEY=your-stripe-secret-key
-   STRIPE_PUBLIC_KEY=your-stripe-public-key
+   CLOUDINARY_NAME=your_cloud_name
+   CLOUDINARY_KEY=your_api_key
+   CLOUDINARY_SECRET=your_api_secret
+   SHIPPING_API_KEY=your-shipping-api-key
    ```
 
 5. **Start dependent services** (if not already running):
@@ -117,27 +134,7 @@ Ensure the following are installed on your system:
 
 The API is documented using **Swagger UI**, which provides an interactive interface to explore and test endpoints.
 
-- **Access Swagger UI**: Navigate to `http://localhost:3000/api-docs` after starting the application.
-- **Features**:
-  - Detailed documentation for all endpoints, including request/response schemas.
-  - Support for JWT authentication (use the "Authorize" button to input a Bearer token).
-  - Try out endpoints directly from the UI.
-- **Key Endpoints**:
-  - `/auth/register`: Register a new user.
-  - `/auth/login`: Log in and obtain a JWT token.
-  - `/orders`: Create and manage orders.
-  - `/payments/intent`: Create a payment intent with Stripe.
-  - `/wishlists`: Manage user wishlists.
-  - `/recommendations`: Get product recommendations.
-  - `/search?q=<query>`: Search products.
-  - `/tracking`: Track order shipments.
-  - `/support/tickets`: Create and manage support tickets.
-  - `/promotions`: Create and apply promotion codes.
-  - `/health`: Check service health.
-
-To authenticate requests in Swagger UI:
-1. Log in using the `/auth/login` endpoint to obtain a JWT token.
-2. Click the "Authorize" button in Swagger UI and enter `Bearer <your-token>`.
+- **Access Swagger UI**: Navigate to `http://localhost:3000/api-docs` after starting the 
 
 ## Design Principles
 
@@ -180,8 +177,6 @@ To run end-to-end tests:
 npm run test:e2e
 ```
 
-*Note*: Ensure test suites are added for critical modules (e.g., `OrdersService`, `PaymentsService`) to verify functionality.
-
 ## Deployment
 
 For production deployment:
@@ -200,7 +195,6 @@ For production deployment:
    npm install -g pm2
    pm2 start dist/main.js --name ecommerce-api
    ```
-5. **Monitor with OpenTelemetry**: Ensure the OpenTelemetry collector is running at `http://localhost:4318/v1/traces` for distributed tracing.
 
 ## Contributing
 
