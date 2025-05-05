@@ -22,6 +22,12 @@ export class AuthService {
     const payload = { sub: user._id, email: user.email, roles: user.roles };
     return { access_token: this.jwtService.sign(payload) };
   }
+  
+  async login(user: IUser) {
+    const refreshToken = this.jwtService.sign({ sub: user._id }, { expiresIn: '7d' });
+    await this.redisService.set(`refresh:${user._id}`, refreshToken, 604800); // 7 days
+    return { accessToken, refreshToken };
+  }
 
   async register(email: string, password: string, roles: string[] = ['customer']): Promise<IUser> {
     return this.usersService.createUser(email, password, roles);

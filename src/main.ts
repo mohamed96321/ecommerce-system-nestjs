@@ -7,7 +7,7 @@ import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import helmet from 'helmet';
 import * as cookieParser from 'cookie-parser';
 import * as csurf from 'csurf';
-import rateLimit from 'express-rate-limit';
+import * as xss from 'xss-clean';
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 
 async function bootstrap() {
@@ -23,7 +23,6 @@ async function bootstrap() {
     res.cookie('XSRF-TOKEN', req.csrfToken());
     next();
   });
-  app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
   app.enableCors({ origin: config.get('cors.origin'), credentials: true });
   app.setGlobalPrefix('api');
   app.enableVersioning({ type: VersioningType.URI });
@@ -32,7 +31,7 @@ async function bootstrap() {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('E-commerce API')
-    .setDescription('E-commerce platform API')
+    .setDescription('E-commerce platform API with enhanced security and performance')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
@@ -43,6 +42,19 @@ async function bootstrap() {
   await app.listen(port);
   logger.log(`Application running on http://localhost:${port}`);
 }
+
+app.use(xss());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+        },
+      },
+    }),
+  );
 
 bootstrap().catch((error) => {
   console.error('Failed to start application', error);

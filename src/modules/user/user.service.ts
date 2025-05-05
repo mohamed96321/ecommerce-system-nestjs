@@ -16,9 +16,9 @@ export class UsersService {
   }
 
   async findById(id: string): Promise<IUser> {
-    const user = await this.userModel.findById(id).exec();
+    const user = await this.userModel.findById(id).select('-password').lean().exec();
     if (!user) throw new NotFoundException('User not found');
-    return user.toObject();
+    return user;
   }
 
   async findByEmail(email: string): Promise<IUser> {

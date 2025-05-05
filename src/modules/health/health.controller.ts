@@ -12,6 +12,16 @@ export class HealthController {
   ) {}
 
   @Get()
+@HealthCheck()
+check() {
+  return this.health.check([
+    () => this.mongooseCheck.pingCheck('mongodb'),
+    () => this.redisCheck.isHealthy('redis'),
+    () => this.elasticsearchCheck.isHealthy('elasticsearch'),
+  ]);
+}
+
+  @Get()
   @HealthCheck()
   @ApiOperation({ summary: 'Check system health' })
   @ApiResponse({ status: 200, description: 'System health status' })

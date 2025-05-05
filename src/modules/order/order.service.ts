@@ -27,38 +27,49 @@ export class OrdersService {
     shippingAddress: { address: string; city: string; country: string; postalCode: string },
     promotionCode?: string,
   ): Promise<IOrder> {
-    const user = await this.usersService.findById(userId);
-    const cart = await this.cartService.getCart(userId);
-    if (!user || !cart || !cart.items.length) throw new NotFoundException('User or cart not found');
-
-    const orderItems = [];
-    let totalAmount = 0;
-
-    for (const item of cart.items) {
-      const product = await this.productsService.findOne(item.product.toString());
-      if (product.stock < item.quantity) throw new BadRequestException(`Insufficient stock for ${product.name}`);
-      const price = await this.promotionsService.applyPromotion(product, promotionCode);
-      orderItems.push({ product: product._id, quantity: item.quantity, price, variant: item.variant });
-      totalAmount += price * item.quantity;
-      await this.productsService.updateStock(item.product.toString(), item.quantity);
+    const session = await this.orderModel.db.startSession();
+    session.startTransaction();
+    try {
+      const user = await this.usersService.findById(userId);
+      const cart = await this.cartService.getCart(userId);
+      if (!user || !cart || !cart.items.length) throw new NotFoundException('User or cart not found');
+  
+      const orderItems = [];
+      let totalAmount = 0;
+  
+      for (const item of cart.items) {
+        const product = await this.productsService.findOne(item.product.toString(), session);
+        if (product.stock < item.quantity) throw new BadRequestException(`Insufficient stock for ${product.name}`);
+        const price = await this.promotionsService.applyPromotion(product, promotionCode);
+        orderItems.push({ product: product._id, quantity: item.quantity, price, variant: item.variant });
+        totalAmount += price * item.quantity;
+        product.stock -= item.quantity;
+        await product.save({ session });
+      }
+  
+      const shippingCost = await this.shippingService.calculateShipping(shippingAddress, orderItems);
+      const paymentIntent = await this.paymentsService.createPaymentIntent(totalAmount + shippingCost, 'usd');
+      const order = new this.orderModel({
+        user: userId,
+        items: orderItems,
+        totalAmount: totalAmount + shippingCost,
+        shippingAddress,
+        shippingCost,
+        paymentIntentId: paymentIntent.id,
+        status: 'pending',
+        promotionCode,
+      });
+  
+      const savedOrder = await order.save({ session });
+      await this.cartService.getCart(userId).then((c) => c.remove());
+      await session.commitTransaction();
+      return savedOrder.toObject();
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
     }
-
-    const shippingCost = await this.shippingService.calculateShipping(shippingAddress, orderItems);
-    const paymentIntent = await this.paymentsService.createPaymentIntent(totalAmount + shippingCost, 'usd');
-    const order = new this.orderModel({
-      user: userId,
-      items: orderItems,
-      totalAmount: totalAmount + shippingCost,
-      shippingAddress,
-      shippingCost,
-      paymentIntentId: paymentIntent.id,
-      status: 'pending',
-      promotionCode,
-    });
-
-    const savedOrder = await order.save();
-    await this.cartService.getCart(userId).then((c) => c.remove());
-    return savedOrder.toObject();
   }
 
   async findByUser(userId: string): Promise<IOrder[]> {

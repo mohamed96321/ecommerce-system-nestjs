@@ -60,9 +60,10 @@ export class ProductsService {
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 })
-        .populate('category')
-        .populate('brand')
-        .populate('seller')
+        .populate('category', 'name')
+        .populate('brand', 'name')
+        .populate('seller', 'name')
+        .lean()
         .exec(),
       this.productModel.countDocuments(filter),
     ]);

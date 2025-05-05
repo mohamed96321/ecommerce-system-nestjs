@@ -4,6 +4,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
 import { ElasticsearchModule } from '@nestjs/elasticsearch';
@@ -73,6 +75,12 @@ import { QuestionsModule } from './modules/questions/questions.module';
     AnalyticsModule,
     PromotionsModule,
     QuestionsModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}

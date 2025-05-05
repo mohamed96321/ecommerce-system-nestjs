@@ -15,10 +15,10 @@ export class ProductsController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'seller')
-  @UseInterceptors(FilesInterceptor('images'))
+  @UseInterceptors(FilesInterceptor('images', 10, { limits: { fileSize: 5 * 1024 * 1024 } }))
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a product (admin/seller only)' })
-  @ApiResponse({ status: 201, description: 'Product created' })
+  @ApiResponse({ status: 201, description: 'Product created successfully' })
   async create(@Body() createProductDto: CreateProductDto, @UploadedFiles() images: Express.Multer.File[]) {
     return this.productsService.create({ ...createProductDto, images });
   }

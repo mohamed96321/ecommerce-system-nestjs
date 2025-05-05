@@ -30,6 +30,66 @@ The project is organized into modular components following NestJS conventions:
 ```
 ecommerce-api folder structure overview:
 src/
+├── auth/                   # (or modules/auth) if you prefer grouping by feature
+│   ├── controllers/
+│   ├── dtos/
+│   ├── entities/
+│   ├── guards/
+│   ├── services/
+│   └── auth.module.ts
+├── common/
+│   ├── decorators/
+│   ├── filters/
+│   ├── guards/
+│   ├── interceptors/
+│   ├── middleware/
+│   └── pipes/
+├── config/
+│   ├── environments/       # env-specific settings (dev, prod, test)
+│   │   ├── development.ts
+│   │   ├── production.ts
+│   │   └── test.ts
+│   ├── configuration.ts    # loads & merges env files
+│   └── validation.ts       # Joi or class-validator schemas for ENV vars
+├── database/
+│   ├── migrations/         # database migration scripts
+│   ├── seeds/              # seed data
+│   ├── ormconfig.ts        # TypeORM or Sequelize config
+│   └── models/             # (if you keep your models separate from modules)
+├── docs/                   # design docs, API spec (OpenAPI/Swagger), ADRs
+│   ├── api-spec.yaml
+│   └── architecture.md
+├── modules/                # feature modules (if separate from root-level)
+│   ├── product/
+│   │   ├── controllers/
+│   │   ├── dtos/
+│   │   ├── entities/
+│   │   ├── services/
+│   │   └── product.module.ts
+│   └── …/
+├── scripts/                # one-off or routine scripts (data imports, cleanups)
+│   └── import-legacy.ts
+├── shared/                 # cross-cutting utilities & clients
+│   ├── cache/
+│   │   └── redis.service.ts
+│   ├── clients/            # external APIs (Stripe, Twilio, etc.)
+│   ├── exceptions/         # custom Error classes
+│   ├── logger/             # Winston/pino setup
+│   └── utils/
+│       ├── date.ts
+│       ├── email.ts
+│       └── validator.ts
+├── tests/                  # e2e, integration, unit tests
+│   ├── e2e/
+│   ├── fixtures/
+│   └── unit/
+├── types/                  # global TypeScript definitions & interfaces
+│   └── custom.d.ts
+├── app.module.ts           # root module (Nest) or main app entry
+├── main.ts                 # server bootstrap
+└── bootstrap.ts            # optional: separate initialization logic
+
+src/
 ├── config/
 ├── modules/
 │   ├── auth/
